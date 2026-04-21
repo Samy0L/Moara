@@ -1,132 +1,133 @@
-let CANVAS_SIZE;
-let nodes = [];
+// board.js - canvas p5.js: desenarea tablei si gestionarea click-urilor
+//
+// Indexarea nodurilor (0-23):
+//   Inel exterior : noduri  0-7
+//   Inel mijlociu : noduri  8-15
+//   Inel interior : noduri 16-23
+//
+// Ordinea in fiecare inel (sensul acelor de ceasornic, start stanga-sus):
+//   TL(0), T(1), TR(2), R(3), BR(4), B(5), BL(6), L(7)
 
-// ─── p5.js sketch ─────────────────────────────────────────────
-new p5(function (p) {
+let MARIME_CANVAS;
+let noduri = [];
 
-  p.setup = function () {
-    CANVAS_SIZE = calcSize();
-    const cnv = p.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-    cnv.parent('canvas-container');
-    computeNodes();
-    // loop activ – tabla se redesenează după fiecare click
-  };
-
-  p.windowResized = function () {
-    CANVAS_SIZE = calcSize();
-    p.resizeCanvas(CANVAS_SIZE, CANVAS_SIZE);
-    computeNodes();
-  };
-
-  p.draw = function () {
-    p.background('#1a1510');
-    drawBoard(p);
-    drawNodes(p);
-    drawPieces(p); // definit în pieces.js
-  };
-
-  // Click → găsește nodul cel mai apropiat → încearcă plasare
-  p.mousePressed = function () {
-    const idx = getNodeAtClick(p.mouseX, p.mouseY);
-    if (idx !== -1) {
-      placePiece(idx); // definit în pieces.js
-    }
-  };
-
-});
-
-// ─── Dimensiunea canvas-ului (responsive) ─────────────────────
-function calcSize() {
-  const w = document.documentElement.clientWidth;
-  const h = document.documentElement.clientHeight;
-  return Math.min(w, h) - 20;
+function setup() {
+  MARIME_CANVAS = calculeazaMarimaCanvas();
+  let cnv = createCanvas(MARIME_CANVAS, MARIME_CANVAS);
+  cnv.parent('canvas-container');
+  calculeazaNoduri();
+  actualizeazaUI();
 }
 
-// ─── Calculează coordonatele celor 24 de noduri ───────────────
-function computeNodes() {
-  nodes = [];
+function windowResized() {
+  MARIME_CANVAS = calculeazaMarimaCanvas();
+  resizeCanvas(MARIME_CANVAS, MARIME_CANVAS);
+  calculeazaNoduri();
+}
 
-  const s      = CANVAS_SIZE;
-  const cx     = s / 2;
-  const cy     = s / 2;
-  const margin = s * 0.08;
-  const step   = (s / 2 - margin) / 3;
+function draw() {
+  background('#1a1a1a');
+  deseneazaTabla();
+  deseneazaNoduri();
+  deseneazaMori();
+  deseneazaDestinatieMutare();
+  deseneazaEleminabile();
+  deseneazaPiese();
+}
 
-  const halfSides = [
-    s / 2 - margin,
-    s / 2 - margin - step,
-    s / 2 - margin - step * 2,
+function mousePressed() {
+  if (jocTerminat) return;
+  let idx = getNodLaClick(mouseX, mouseY);
+  if (idx !== -1) {
+    handleClick(idx);
+  }
+}
+
+// Calculeaza dimensiunea canvasului in functie de ecran
+function calculeazaMarimaCanvas() {
+  let spatiu = min(windowWidth - 320, windowHeight - 120);
+  return max(spatiu, 280);
+}
+
+// Calculeaza coordonatele x,y ale celor 24 de noduri
+function calculeazaNoduri() {
+  noduri = [];
+  let s  = MARIME_CANVAS;
+  let cx = s / 2;
+  let cy = s / 2;
+  let margine = s * 0.08;
+  let pas = (s / 2 - margine) / 3;
+
+  let jumatati = [
+    s / 2 - margine,
+    s / 2 - margine - pas,
+    s / 2 - margine - pas * 2
   ];
 
-  for (let ring = 0; ring < 3; ring++) {
-    const h = halfSides[ring];
-    nodes.push(
-      { x: cx - h, y: cy - h }, // 0 TL
-      { x: cx,     y: cy - h }, // 1 T
-      { x: cx + h, y: cy - h }, // 2 TR
-      { x: cx + h, y: cy     }, // 3 R
-      { x: cx + h, y: cy + h }, // 4 BR
-      { x: cx,     y: cy + h }, // 5 B
-      { x: cx - h, y: cy + h }, // 6 BL
-      { x: cx - h, y: cy     }, // 7 L
+  for (let inel = 0; inel < 3; inel++) {
+    let h = jumatati[inel];
+    noduri.push(
+      { x: cx - h, y: cy - h }, // TL
+      { x: cx,     y: cy - h }, // T
+      { x: cx + h, y: cy - h }, // TR
+      { x: cx + h, y: cy     }, // R
+      { x: cx + h, y: cy + h }, // BR
+      { x: cx,     y: cy + h }, // B
+      { x: cx - h, y: cy + h }, // BL
+      { x: cx - h, y: cy     }  // L
     );
   }
 }
 
-// ─── Returnează indexul nodului cel mai apropiat de click ──────
-// Returnează -1 dacă click-ul e prea departe de orice nod
-function getNodeAtClick(mx, my) {
-  const threshold = CANVAS_SIZE * 0.05; // raza de detecție
-  let bestIdx = -1;
-  let bestDist = threshold;
+// Returneaza indexul nodului cel mai aproape de click (-1 daca e prea departe)
+function getNodLaClick(mx, my) {
+  let prag = MARIME_CANVAS * 0.05;
+  let celMaiBun = -1;
+  let distMin = prag;
 
-  for (let i = 0; i < nodes.length; i++) {
-    const d = Math.hypot(mx - nodes[i].x, my - nodes[i].y);
-    if (d < bestDist) {
-      bestDist = d;
-      bestIdx  = i;
+  for (let i = 0; i < noduri.length; i++) {
+    let d = dist(mx, my, noduri[i].x, noduri[i].y);
+    if (d < distMin) {
+      distMin = d;
+      celMaiBun = i;
     }
   }
-
-  return bestIdx;
+  return celMaiBun;
 }
 
-// ─── Desenează liniile tablei ──────────────────────────────────
-function drawBoard(p) {
-  p.stroke(200, 168, 75);
-  p.strokeWeight(CANVAS_SIZE * 0.004);
-  p.noFill();
+// Deseneaza cele 3 patrate si cele 4 linii radiale
+function deseneazaTabla() {
+  stroke(200, 168, 75);
+  strokeWeight(MARIME_CANVAS * 0.004);
+  noFill();
 
-  // Cele 3 pătrate concentrice
-  for (let ring = 0; ring < 3; ring++) {
-    const tl = nodes[ring * 8 + 0]; // TL
-    const br = nodes[ring * 8 + 4]; // BR
-    p.rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+  // 3 patrate concentrice
+  for (let inel = 0; inel < 3; inel++) {
+    let tl = noduri[inel * 8 + 0];
+    let br = noduri[inel * 8 + 4];
+    rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
   }
 
-  // Cele 4 linii radiale (exterior → interior, mijlocul fiecărei laturi)
-  for (const mi of [1, 3, 5, 7]) {
-    const outer = nodes[mi];
-    const inner = nodes[16 + mi];
-    p.line(outer.x, outer.y, inner.x, inner.y);
+  // 4 linii radiale (leaga mijlocul fiecarei laturi)
+  for (let mi of [1, 3, 5, 7]) {
+    line(noduri[mi].x, noduri[mi].y, noduri[16 + mi].x, noduri[16 + mi].y);
   }
 }
 
-// ─── Desenează nodurile goale ──────────────────────────────────
-function drawNodes(p) {
-  const r = CANVAS_SIZE * 0.018;
+// Deseneaza un punct mic la fiecare nod liber
+function deseneazaNoduri() {
+  let r = MARIME_CANVAS * 0.018;
 
-  for (let i = 0; i < nodes.length; i++) {
-    if (board[i] !== 0) continue; // ocupat → desenat de drawPieces
+  for (let i = 0; i < noduri.length; i++) {
+    if (board[i] !== 0) continue; // nodul ocupat e desenat de deseneazaPiese
 
-    const { x, y } = nodes[i];
-    p.stroke(200, 168, 75);
-    p.strokeWeight(1.5);
-    p.fill('#1a1510');
-    p.ellipse(x, y, r * 2, r * 2);
+    stroke(200, 168, 75);
+    strokeWeight(1.5);
+    fill('#1a1a1a');
+    ellipse(noduri[i].x, noduri[i].y, r * 2, r * 2);
 
-    p.noStroke();
-    p.fill(200, 168, 75, 180);
-    p.ellipse(x, y, r * 0.6, r * 0.6);
+    noStroke();
+    fill(200, 168, 75, 160);
+    ellipse(noduri[i].x, noduri[i].y, r * 0.6, r * 0.6);
   }
 }
