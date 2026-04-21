@@ -9,7 +9,7 @@ const TOATE_MORILE = [
 ];
 
 // Morile complete in momentul curent
-let moriActive = [];
+var moriActive = [];
 
 // Verifica toate combinatiile si le salveaza pe cele complete
 function detecteazaMori() {

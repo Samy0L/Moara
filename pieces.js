@@ -3,13 +3,13 @@
 const MAX_PIESE = 9;
 
 // board[i] = 0 (liber), 1 (jucator 1), 2 (jucator 2)
-let board = new Array(24).fill(0);
+var board = new Array(24).fill(0);
 
 // Cate piese mai are fiecare jucator de plasat din mana
-let pieseInMana = { 1: MAX_PIESE, 2: MAX_PIESE };
+var pieseInMana = { 1: MAX_PIESE, 2: MAX_PIESE };
 
 // Jucatorul curent (1 sau 2)
-let jucatorCurent = 1;
+var jucatorCurent = 1;
 
 // Plaseaza o piesa a jucatorului curent pe pozitia idx
 function plaseazaPiesa(idx) {

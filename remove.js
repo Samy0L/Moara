@@ -1,52 +1,40 @@
-// mills.js - detecteaza si deseneaza morile (3 piese aliniate)
+// remove.js - eliminarea pieselor adverse dupa formarea unei mori
 
-// Toate combinatiile posibile de moara (16 total)
-const TOATE_MORILE = [
-  [0,1,2], [2,3,4], [4,5,6], [6,7,0],       // inel exterior
-  [8,9,10], [10,11,12], [12,13,14], [14,15,8], // inel mijlociu
-  [16,17,18], [18,19,20], [20,21,22], [22,23,16], // inel interior
-  [1,9,17], [3,11,19], [5,13,21], [7,15,23]  // linii radiale
-];
+var trebuieEliminate = false;
 
-// Morile complete in momentul curent
-let moriActive = [];
+// Elimina piesa adversarului de pe pozitia idx
+function eliminaPiesa(idx) {
+  let adversar = jucatorCurent === 1 ? 2 : 1;
 
-// Verifica toate combinatiile si le salveaza pe cele complete
-function detecteazaMori() {
-  moriActive = [];
-  for (let i = 0; i < TOATE_MORILE.length; i++) {
-    let a = TOATE_MORILE[i][0];
-    let b = TOATE_MORILE[i][1];
-    let c = TOATE_MORILE[i][2];
-    if (board[a] !== 0 && board[a] === board[b] && board[b] === board[c]) {
-      moriActive.push(TOATE_MORILE[i]);
-    }
-  }
+  // Trebuie sa fie piesa adversarului
+  if (board[idx] !== adversar) return;
+
+  // Nu poti elimina o piesa dintr-o moara, daca exista alternative
+  let toateInMoara = board.every((v, i) => v !== adversar || esteInMoara(i));
+  if (esteInMoara(idx) && !toateInMoara) return;
+
+  board[idx] = 0;
+  trebuieEliminate = false;
+  jucatorCurent = jucatorCurent === 1 ? 2 : 1;
+  verificaGameOver();
 }
 
-// Returneaza true daca nodul idx face parte dintr-o moara activa
-function esteInMoara(idx) {
-  for (let i = 0; i < moriActive.length; i++) {
-    if (moriActive[i].includes(idx)) return true;
-  }
-  return false;
-}
+// Deseneaza halou rosu pe piesele eliminabile
+function deseneazaEleminabile() {
+  if (!trebuieEliminate) return;
 
-// Deseneaza o linie colorata peste fiecare moara activa
-function deseneazaMori() {
-  for (let i = 0; i < moriActive.length; i++) {
-    let moara = moriActive[i];
-    let jucator = board[moara[0]];
+  let adversar = jucatorCurent === 1 ? 2 : 1;
+  let toateInMoara = board.every((v, i) => v !== adversar || esteInMoara(i));
+  let r = MARIME_CANVAS * 0.018;
 
-    if (jucator === 1) {
-      stroke(255, 220, 100);
-    } else {
-      stroke(220, 80, 60);
-    }
-    strokeWeight(MARIME_CANVAS * 0.007);
+  for (let i = 0; i < 24; i++) {
+    if (board[i] !== adversar) continue;
+    if (esteInMoara(i) && !toateInMoara) continue;
 
-    let nodeA = noduri[moara[0]];
-    let nodeC = noduri[moara[2]];
-    line(nodeA.x, nodeA.y, nodeC.x, nodeC.y);
+    let nod = noduri[i];
+    noFill();
+    stroke(220, 80, 60);
+    strokeWeight(2);
+    ellipse(nod.x, nod.y, r * 2 + MARIME_CANVAS * 0.03, r * 2 + MARIME_CANVAS * 0.03);
   }
 }

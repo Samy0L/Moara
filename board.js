@@ -10,6 +10,9 @@
 
 let MARIME_CANVAS;
 let noduri = [];
+// game.js
+// var jocTerminat = false;
+// var board = new Array(24).fill(0); 
 
 function setup() {
   MARIME_CANVAS = calculeazaMarimaCanvas();

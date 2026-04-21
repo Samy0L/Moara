@@ -1,6 +1,6 @@
 // gameover.js - detectia finalului de joc si restart
 
-let jocTerminat = false;
+var jocTerminat = false;
 
 // Verifica daca jocul s-a terminat dupa o mutare
 function verificaGameOver() {

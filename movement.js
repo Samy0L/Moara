@@ -29,7 +29,7 @@ const ADIACENTE = [
 ];
 
 // Nodul selectat pentru mutare (-1 = nimic selectat)
-let nodSelectat = -1;
+var nodSelectat = -1;
 
 // Returneaza faza jucatorului: 'plasare', 'mutare', 'zbor'
 function getFaza(jucator) {
