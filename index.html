@@ -3,16 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moara</title>
+  <title>Joc Moara</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.min.js"></script>
 </head>
 <body>
-  <div id="canvas-container"></div>
 
-  <script src="mills.js"></script>  
-  <script src="remove.js"></script>  
-  <script src="pieces.js"></script>  
-  <script src="board.js"></script>   
+  <h1>Moara</h1>
+
+  <div id="app">
+
+    <!-- Panou Jucator 1 -->
+    <div class="panel" id="panel1">
+      <h2>Jucator 1</h2>
+      <div class="piesa-demo alba"></div>
+      <p>In mana: <span id="mana1">9</span></p>
+      <p>Pe tabla: <span id="tabla1">0</span></p>
+      <p>Victorii: <span id="victorii1">0</span></p>
+    </div>
+
+    <!-- Canvas p5.js -->
+    <div id="canvas-container"></div>
+
+    <!-- Panou Jucator 2 -->
+    <div class="panel" id="panel2">
+      <h2>Jucator 2</h2>
+      <div class="piesa-demo neagra"></div>
+      <p>In mana: <span id="mana2">9</span></p>
+      <p>Pe tabla: <span id="tabla2">0</span></p>
+      <p>Victorii: <span id="victorii2">0</span></p>
+    </div>
+
+  </div>
+
+  <!-- Mesaj contextual si restart -->
+  <p id="mesaj">Jucatorul 1 plaseaza o piesa.</p>
+  <button id="btn-restart" onclick="restartJoc()">Restart</button>
+
+  <!-- Overlay game over -->
+  <div id="overlay-gameover">
+    <div id="box-gameover">
+      <p id="text-castigator"></p>
+      <button onclick="restartJoc()">Joaca din nou</button>
+    </div>
+  </div>
+
+  <!-- Scripturi (ordinea conteaza: variabilele trebuie definite inainte de a fi folosite) -->
+  <script src="mills.js"></script>
+  <script src="remove.js"></script>
+  <script src="movement.js"></script>
+  <script src="pieces.js"></script>
+  <script src="ui.js"></script>
+  <script src="board.js"></script>
+
 </body>
 </html>

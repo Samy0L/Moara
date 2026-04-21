@@ -1,80 +1,58 @@
-const MAX_PIECES = 9;
+// pieces.js - datele pieselor si logica de plasare
 
-// board[i] = 0 (gol) | 1 (jucător 1) | 2 (jucător 2)
-const board = new Array(24).fill(0);
+const MAX_PIESE = 9;
 
-// Câte piese mai are fiecare jucător de plasat
-const piecesLeft = { 1: MAX_PIECES, 2: MAX_PIECES };
+// board[i] = 0 (liber), 1 (jucator 1), 2 (jucator 2)
+let board = new Array(24).fill(0);
 
-// Jucătorul curent (1 sau 2)
-let currentPlayer = 1;
+// Cate piese mai are fiecare jucator de plasat din mana
+let pieseInMana = { 1: MAX_PIESE, 2: MAX_PIESE };
 
-// ─── Plasare ──────────────────────────────────────────────────
+// Jucatorul curent (1 sau 2)
+let jucatorCurent = 1;
 
-function placePiece(idx) {
-  // Dacă trebuie să elimine mai întâi, delegăm către removePiece()
-  if (mustRemove) {
-    removePiece(idx); // definit în remove.js
-    return true;
-  }
-
+// Plaseaza o piesa a jucatorului curent pe pozitia idx
+function plaseazaPiesa(idx) {
   if (board[idx] !== 0) return false;
-  if (piecesLeft[currentPlayer] <= 0) return false;
+  if (pieseInMana[jucatorCurent] <= 0) return false;
 
-  // Snapshot mori înainte de plasare
-  const millsBefore = activeMills.length;
+  board[idx] = jucatorCurent;
+  pieseInMana[jucatorCurent]--;
 
-  board[idx] = currentPlayer;
-  piecesLeft[currentPlayer]--;
+  detecteazaMori();
 
-  // Detectează mori după plasare
-  detectMills(); // definit în mills.js
-
-  // Dacă s-a format o moară nouă → jucătorul curent trebuie să elimine
-  if (activeMills.some(m => m.includes(idx) && board[m[0]] === currentPlayer)) {
-    mustRemove = true;
-    // NU schimbăm rândul – jucătorul curent alege piesa de eliminat
+  // Daca s-a format o moara, jucatorul trebuie sa elimine o piesa adversa
+  if (moriActive.some(m => m.includes(idx) && board[m[0]] === jucatorCurent)) {
+    trebuieEliminate = true;
     return true;
   }
 
-  // Nicio moară nouă → schimbă rândul normal
-  currentPlayer = currentPlayer === 1 ? 2 : 1;
+  jucatorCurent = jucatorCurent === 1 ? 2 : 1;
   return true;
 }
 
-// ─── Desen piese ──────────────────────────────────────────────
-
-function drawPieces(p) {
-  const r = CANVAS_SIZE * 0.032;
+// Deseneaza piesele de pe tabla
+function deseneazaPiese() {
+  let r = MARIME_CANVAS * 0.032;
 
   for (let i = 0; i < 24; i++) {
     if (board[i] === 0) continue;
 
-    const { x, y } = nodes[i];
-    const player   = board[i];
-    const inMill   = isInActiveMill(i); // definit în mills.js
+    let nod = noduri[i];
+    let inMoara = esteInMoara(i);
 
-    if (player === 1) {
-      p.stroke(inMill ? 255 : 160, inMill ? 230 : 150, inMill ? 150 : 135);
-      p.strokeWeight(inMill ? 3 : 2);
-      p.fill(220, 215, 200);
-      p.ellipse(x, y, r * 2, r * 2);
-
-      p.noFill();
-      p.stroke(160, 150, 135, 120);
-      p.strokeWeight(1);
-      p.ellipse(x, y, r * 1.1, r * 1.1);
-
+    if (board[i] === 1) {
+      // Jucator 1 - piesa alba
+      fill(220, 215, 200);
+      if (inMoara) { stroke(255, 220, 100); strokeWeight(3); }
+      else          { stroke(150, 140, 130); strokeWeight(2); }
     } else {
-      p.stroke(inMill ? 220 : 200, inMill ? 80 : 168, inMill ? 60 : 75);
-      p.strokeWeight(inMill ? 3 : 2);
-      p.fill(35, 25, 12);
-      p.ellipse(x, y, r * 2, r * 2);
-
-      p.noFill();
-      p.stroke(200, 168, 75, 120);
-      p.strokeWeight(1);
-      p.ellipse(x, y, r * 1.1, r * 1.1);
+      // Jucator 2 - piesa neagra
+      fill(35, 25, 12);
+      if (inMoara) { stroke(220, 80, 60); strokeWeight(3); }
+      else          { stroke(200, 168, 75); strokeWeight(2); }
     }
+
+    ellipse(nod.x, nod.y, r * 2, r * 2);
   }
 }
