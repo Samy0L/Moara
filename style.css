@@ -1,11 +1,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
+html, body {
+  width: 100%;
+  height: 100%;
   background: #1a1510;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  overflow: hidden;
 }
 
 #canvas-container canvas {
