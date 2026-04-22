@@ -3,6 +3,8 @@ const max_piese = 9;
 var board = new Array(24).fill(0);
 var pieseInMana = { 1: max_piese, 2: max_piese };
 var jucatorCurent = 1;
+var numePj1 = prompt("Introduceti numele Jucatorului 1:");
+var numePj2 = prompt("Introduceti numele Jucatorului 2:");
 
 function plaseazaPiesa(idx) {
   if (board[idx] !== 0) return;
@@ -33,6 +35,8 @@ function deseneazaPiese() {
     ellipse(nod.x, nod.y, r * 2, r * 2);
   }
 }
+
+
 
 function restartJoc() {
   board.fill(0);

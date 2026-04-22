@@ -2,8 +2,11 @@ let marime_canvas;
 let noduri = [];
 
 const restartButton = {
-  x: 0, y: 0, w: 100, h: 32,
-  init: function () { 
+  x: 0,
+  y: 0,
+  w: 100,
+  h: 32,
+  init: function () {
     this.x = marime_canvas / 2 - this.w / 2;
     this.y = marime_canvas + 12;
   },
@@ -21,18 +24,20 @@ const restartButton = {
   },
   checkIfClicked: function () {
     if (
-      mouseX >= this.x && mouseX <= this.x + this.w &&
-      mouseY >= this.y && mouseY <= this.y + this.h
+      mouseX >= this.x &&
+      mouseX <= this.x + this.w &&
+      mouseY >= this.y &&
+      mouseY <= this.y + this.h
     ) {
       restartJoc();
     }
-  }
+  },
 };
 
 function setup() {
   marime_canvas = calculeazaMarimaCanvas();
   let cnv = createCanvas(marime_canvas, marime_canvas + 60);
-  cnv.parent('canvas-container');
+  cnv.parent("canvas-container");
   calculeazaNoduri();
   restartButton.init();
 }
@@ -45,17 +50,22 @@ function windowResized() {
 }
 
 function draw() {
-  background('#1a1a1a');
+  background("#1a1a1a");
   deseneazaTabla();
   deseneazaNoduri();
   deseneazaPiese();
   restartButton.draw();
 
-  fill(200, 168, 75); 
+  fill(200, 168, 75);
   noStroke();
   textSize(14);
   textAlign(CENTER, CENTER);
-  text("Jucatorul " + jucatorCurent + " plaseaza o piesa.", marime_canvas / 2, marime_canvas - 14);
+  let numeActual = jucatorCurent === 1 ? numePj1 : numePj2;
+  text(
+    numeActual + " plaseaza o piesa.",
+    marime_canvas / 2,
+    marime_canvas -14,
+  );
 }
 
 function mousePressed() {
@@ -74,7 +84,7 @@ function calculeazaMarimaCanvas() {
 
 function calculeazaNoduri() {
   noduri = [];
-  let s  = marime_canvas;
+  let s = marime_canvas;
   let cx = s / 2;
   let cy = s / 2;
   let margine = s * 0.08;
@@ -83,20 +93,20 @@ function calculeazaNoduri() {
   let jumatati = [
     s / 2 - margine,
     s / 2 - margine - pas,
-    s / 2 - margine - pas * 2
+    s / 2 - margine - pas * 2,
   ];
 
   for (let inel = 0; inel < 3; inel++) {
     let h = jumatati[inel];
     noduri.push(
       { x: cx - h, y: cy - h },
-      { x: cx,     y: cy - h },
+      { x: cx, y: cy - h },
       { x: cx + h, y: cy - h },
-      { x: cx + h, y: cy     },
+      { x: cx + h, y: cy },
       { x: cx + h, y: cy + h },
-      { x: cx,     y: cy + h },
+      { x: cx, y: cy + h },
       { x: cx - h, y: cy + h },
-      { x: cx - h, y: cy     }
+      { x: cx - h, y: cy },
     );
   }
 }
@@ -140,7 +150,7 @@ function deseneazaNoduri() {
 
     stroke(200, 168, 75);
     strokeWeight(1.5);
-    fill('#1a1a1a');
+    fill("#1a1a1a");
     ellipse(noduri[i].x, noduri[i].y, r * 2, r * 2);
 
     noStroke();
