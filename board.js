@@ -1,58 +1,80 @@
-// board.js - canvas p5.js: desenarea tablei si gestionarea click-urilor
-//
-// Indexarea nodurilor (0-23):
-//   Inel exterior : noduri  0-7
-//   Inel mijlociu : noduri  8-15
-//   Inel interior : noduri 16-23
-//
-// Ordinea in fiecare inel (sensul acelor de ceasornic, start stanga-sus):
-//   TL(0), T(1), TR(2), R(3), BR(4), B(5), BL(6), L(7)
-
 let MARIME_CANVAS;
 let noduri = [];
-// game.js
-// var jocTerminat = false;
-// var board = new Array(24).fill(0); 
+
+// Butonul de restart - acelasi stil ca Button-ul de la clasa
+const restartButton = {
+  x: 0, y: 0, w: 100, h: 32,
+  init: function () { 
+    this.x = MARIME_CANVAS / 2 - this.w / 2;
+    this.y = MARIME_CANVAS + 12;
+  },
+  draw: function () {
+    fill(50, 45, 40);
+    stroke(200, 168, 75);
+    strokeWeight(1);
+    rect(this.x, this.y, this.w, this.h, 4);
+
+    fill(200, 168, 75);
+    noStroke();
+    textSize(13);
+    textAlign(CENTER, CENTER);
+    text("Restart", this.x + this.w / 2, this.y + this.h / 2);
+  },
+  checkIfClicked: function () {
+    if (
+      mouseX >= this.x && mouseX <= this.x + this.w &&
+      mouseY >= this.y && mouseY <= this.y + this.h
+    ) {
+      restartJoc();
+    }
+  }
+};
 
 function setup() {
   MARIME_CANVAS = calculeazaMarimaCanvas();
-  let cnv = createCanvas(MARIME_CANVAS, MARIME_CANVAS);
+  // canvas mai inalt cu 60px ca sa incapa butonul sub tabla
+  let cnv = createCanvas(MARIME_CANVAS, MARIME_CANVAS + 60);
   cnv.parent('canvas-container');
   calculeazaNoduri();
-  actualizeazaUI();
+  restartButton.init();
 }
 
 function windowResized() {
   MARIME_CANVAS = calculeazaMarimaCanvas();
-  resizeCanvas(MARIME_CANVAS, MARIME_CANVAS);
+  resizeCanvas(MARIME_CANVAS, MARIME_CANVAS + 60);
   calculeazaNoduri();
+  restartButton.init();
 }
 
 function draw() {
   background('#1a1a1a');
   deseneazaTabla();
   deseneazaNoduri();
-  deseneazaMori();
-  deseneazaDestinatieMutare();
-  deseneazaEleminabile();
   deseneazaPiese();
+  restartButton.draw();
+
+  // Mesaj jucator curent
+  fill(200, 168, 75); 
+  noStroke();
+  textSize(14);
+  textAlign(CENTER, CENTER);
+  text("Jucatorul " + jucatorCurent + " plaseaza o piesa.", MARIME_CANVAS / 2, MARIME_CANVAS - 14);
 }
 
 function mousePressed() {
-  if (jocTerminat) return;
+  restartButton.checkIfClicked();
+
   let idx = getNodLaClick(mouseX, mouseY);
   if (idx !== -1) {
-    handleClick(idx);
+    plaseazaPiesa(idx);
   }
 }
 
-// Calculeaza dimensiunea canvasului in functie de ecran
 function calculeazaMarimaCanvas() {
-  let spatiu = min(windowWidth - 320, windowHeight - 120);
+  let spatiu = min(windowWidth - 40, windowHeight - 120);
   return max(spatiu, 280);
 }
 
-// Calculeaza coordonatele x,y ale celor 24 de noduri
 function calculeazaNoduri() {
   noduri = [];
   let s  = MARIME_CANVAS;
@@ -70,19 +92,18 @@ function calculeazaNoduri() {
   for (let inel = 0; inel < 3; inel++) {
     let h = jumatati[inel];
     noduri.push(
-      { x: cx - h, y: cy - h }, // TL
-      { x: cx,     y: cy - h }, // T
-      { x: cx + h, y: cy - h }, // TR
-      { x: cx + h, y: cy     }, // R
-      { x: cx + h, y: cy + h }, // BR
-      { x: cx,     y: cy + h }, // B
-      { x: cx - h, y: cy + h }, // BL
-      { x: cx - h, y: cy     }  // L
+      { x: cx - h, y: cy - h },
+      { x: cx,     y: cy - h },
+      { x: cx + h, y: cy - h },
+      { x: cx + h, y: cy     },
+      { x: cx + h, y: cy + h },
+      { x: cx,     y: cy + h },
+      { x: cx - h, y: cy + h },
+      { x: cx - h, y: cy     }
     );
   }
 }
 
-// Returneaza indexul nodului cel mai aproape de click (-1 daca e prea departe)
 function getNodLaClick(mx, my) {
   let prag = MARIME_CANVAS * 0.05;
   let celMaiBun = -1;
@@ -98,31 +119,27 @@ function getNodLaClick(mx, my) {
   return celMaiBun;
 }
 
-// Deseneaza cele 3 patrate si cele 4 linii radiale
 function deseneazaTabla() {
   stroke(200, 168, 75);
   strokeWeight(MARIME_CANVAS * 0.004);
   noFill();
 
-  // 3 patrate concentrice
   for (let inel = 0; inel < 3; inel++) {
     let tl = noduri[inel * 8 + 0];
     let br = noduri[inel * 8 + 4];
     rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
   }
 
-  // 4 linii radiale (leaga mijlocul fiecarei laturi)
   for (let mi of [1, 3, 5, 7]) {
     line(noduri[mi].x, noduri[mi].y, noduri[16 + mi].x, noduri[16 + mi].y);
   }
 }
 
-// Deseneaza un punct mic la fiecare nod liber
 function deseneazaNoduri() {
   let r = MARIME_CANVAS * 0.018;
 
   for (let i = 0; i < noduri.length; i++) {
-    if (board[i] !== 0) continue; // nodul ocupat e desenat de deseneazaPiese
+    if (board[i] !== 0) continue;
 
     stroke(200, 168, 75);
     strokeWeight(1.5);
