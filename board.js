@@ -1,12 +1,11 @@
-let MARIME_CANVAS;
+let marime_canvas;
 let noduri = [];
 
-// Butonul de restart - acelasi stil ca Button-ul de la clasa
 const restartButton = {
   x: 0, y: 0, w: 100, h: 32,
   init: function () { 
-    this.x = MARIME_CANVAS / 2 - this.w / 2;
-    this.y = MARIME_CANVAS + 12;
+    this.x = marime_canvas / 2 - this.w / 2;
+    this.y = marime_canvas + 12;
   },
   draw: function () {
     fill(50, 45, 40);
@@ -31,17 +30,16 @@ const restartButton = {
 };
 
 function setup() {
-  MARIME_CANVAS = calculeazaMarimaCanvas();
-  // canvas mai inalt cu 60px ca sa incapa butonul sub tabla
-  let cnv = createCanvas(MARIME_CANVAS, MARIME_CANVAS + 60);
+  marime_canvas = calculeazaMarimaCanvas();
+  let cnv = createCanvas(marime_canvas, marime_canvas + 60);
   cnv.parent('canvas-container');
   calculeazaNoduri();
   restartButton.init();
 }
 
 function windowResized() {
-  MARIME_CANVAS = calculeazaMarimaCanvas();
-  resizeCanvas(MARIME_CANVAS, MARIME_CANVAS + 60);
+  marime_canvas = calculeazaMarimaCanvas();
+  resizeCanvas(marime_canvas, marime_canvas + 60);
   calculeazaNoduri();
   restartButton.init();
 }
@@ -53,12 +51,11 @@ function draw() {
   deseneazaPiese();
   restartButton.draw();
 
-  // Mesaj jucator curent
   fill(200, 168, 75); 
   noStroke();
   textSize(14);
   textAlign(CENTER, CENTER);
-  text("Jucatorul " + jucatorCurent + " plaseaza o piesa.", MARIME_CANVAS / 2, MARIME_CANVAS - 14);
+  text("Jucatorul " + jucatorCurent + " plaseaza o piesa.", marime_canvas / 2, marime_canvas - 14);
 }
 
 function mousePressed() {
@@ -77,7 +74,7 @@ function calculeazaMarimaCanvas() {
 
 function calculeazaNoduri() {
   noduri = [];
-  let s  = MARIME_CANVAS;
+  let s  = marime_canvas;
   let cx = s / 2;
   let cy = s / 2;
   let margine = s * 0.08;
@@ -105,7 +102,7 @@ function calculeazaNoduri() {
 }
 
 function getNodLaClick(mx, my) {
-  let prag = MARIME_CANVAS * 0.05;
+  let prag = marime_canvas * 0.05;
   let celMaiBun = -1;
   let distMin = prag;
 
@@ -121,7 +118,7 @@ function getNodLaClick(mx, my) {
 
 function deseneazaTabla() {
   stroke(200, 168, 75);
-  strokeWeight(MARIME_CANVAS * 0.004);
+  strokeWeight(marime_canvas * 0.004);
   noFill();
 
   for (let inel = 0; inel < 3; inel++) {
@@ -136,7 +133,7 @@ function deseneazaTabla() {
 }
 
 function deseneazaNoduri() {
-  let r = MARIME_CANVAS * 0.018;
+  let r = marime_canvas * 0.018;
 
   for (let i = 0; i < noduri.length; i++) {
     if (board[i] !== 0) continue;

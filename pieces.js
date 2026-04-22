@@ -1,7 +1,7 @@
-const MAX_PIESE = 9;
+const max_piese = 9;
 
 var board = new Array(24).fill(0);
-var pieseInMana = { 1: MAX_PIESE, 2: MAX_PIESE };
+var pieseInMana = { 1: max_piese, 2: max_piese };
 var jucatorCurent = 1;
 
 function plaseazaPiesa(idx) {
@@ -15,7 +15,7 @@ function plaseazaPiesa(idx) {
 }
 
 function deseneazaPiese() {
-  let r = MARIME_CANVAS * 0.032;
+  let r = marime_canvas * 0.032;
 
   for (let i = 0; i < 24; i++) {
     if (board[i] === 0) continue;
@@ -36,7 +36,7 @@ function deseneazaPiese() {
 
 function restartJoc() {
   board.fill(0);
-  pieseInMana[1] = MAX_PIESE;
-  pieseInMana[2] = MAX_PIESE;
+  pieseInMana[1] = max_piese;
+  pieseInMana[2] = max_piese;
   jucatorCurent = 1;
 }
