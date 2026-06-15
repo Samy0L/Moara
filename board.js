@@ -104,6 +104,7 @@ function mousePressed() {
   let idx = getNodLaClick(mouseX, mouseY);
   if (idx !== -1) {
     plaseazaPiesa(idx);
+    actualizeazaCaseteJucatori();
   }
 }
 
