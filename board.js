@@ -1,5 +1,21 @@
+import {
+  board,
+  pieseLuate,
+  jucatorCurent,
+  numePj1,
+  numePj2,
+  mesajMoara,
+  seteazaNumeJucator1,
+  seteazaNumeJucator2,
+  plaseazaPiesa,
+  deseneazaPiese,
+  restartJoc,
+} from "./pieces.js";
+
 let marime_canvas;
 let noduri = [];
+let jocPornit = false;
+let mesajIntroducere = "Introdu numele jucatorului 1.";
 
 const restartButton = {
   x: 0,
@@ -40,6 +56,8 @@ function setup() {
   cnv.parent("canvas-container");
   calculeazaNoduri();
   restartButton.init();
+  pregatesteFormulareNume();
+  actualizeazaCaseteJucatori();
 }
 
 function windowResized() {
@@ -53,23 +71,34 @@ function draw() {
   background("#1a1a1a");
   deseneazaTabla();
   deseneazaNoduri();
-  deseneazaPiese();
+  deseneazaPiese(noduri, marime_canvas);
   restartButton.draw();
+  actualizeazaCaseteJucatori();
 
   fill(200, 168, 75);
   noStroke();
   textSize(14);
   textAlign(CENTER, CENTER);
   let numeActual = jucatorCurent === 1 ? numePj1 : numePj2;
-  text(
-    numeActual + " plaseaza o piesa.",
-    marime_canvas / 2,
-    marime_canvas -14,
-  );
+  let mesaj = numeActual + " plaseaza o piesa.";
+
+  if (!jocPornit || mesajIntroducere !== "") {
+    mesaj = mesajIntroducere;
+  } else if (mesajMoara !== "") {
+    mesaj = mesajMoara;
+  }
+
+  text(mesaj, marime_canvas / 2, marime_canvas - 14);
 }
 
 function mousePressed() {
   restartButton.checkIfClicked();
+
+  if (!jocPornit) {
+    return;
+  }
+
+  mesajIntroducere = "";
 
   let idx = getNodLaClick(mouseX, mouseY);
   if (idx !== -1) {
@@ -78,8 +107,105 @@ function mousePressed() {
 }
 
 function calculeazaMarimaCanvas() {
-  let spatiu = min(windowWidth - 40, windowHeight - 120);
+  let latimeDisponibila = windowWidth - 460;
+
+  if (windowWidth <= 900) {
+    latimeDisponibila = windowWidth - 40;
+  }
+
+  let spatiu = min(latimeDisponibila, windowHeight - 120);
   return max(spatiu, 280);
+}
+
+function actualizeazaCaseteJucatori() {
+  let pieseJucator1 = 0;
+  let pieseJucator2 = 0;
+
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] === 1) {
+      pieseJucator1++;
+    }
+
+    if (board[i] === 2) {
+      pieseJucator2++;
+    }
+  }
+
+  document.getElementById("nume-jucator-1").textContent =
+    numePj1 === "" ? "Nume necompletat" : numePj1;
+  document.getElementById("nume-jucator-2").textContent =
+    numePj2 === "" ? "Nume necompletat" : numePj2;
+  document.getElementById("piese-tabla-1").textContent = pieseJucator1;
+  document.getElementById("piese-tabla-2").textContent = pieseJucator2;
+  document.getElementById("piese-luate-1").textContent = pieseLuate[1];
+  document.getElementById("piese-luate-2").textContent = pieseLuate[2];
+}
+
+function pregatesteFormulareNume() {
+  let inputJucator1 = document.getElementById("input-jucator-1");
+  let inputJucator2 = document.getElementById("input-jucator-2");
+  let butonJucator1 = document.getElementById("buton-jucator-1");
+  let butonJucator2 = document.getElementById("buton-jucator-2");
+
+  butonJucator1.onclick = function () {
+    confirmaNumeJucator1();
+  };
+
+  butonJucator2.onclick = function () {
+    confirmaNumeJucator2();
+  };
+
+  inputJucator1.onkeydown = function (event) {
+    if (event.key === "Enter") {
+      confirmaNumeJucator1();
+    }
+  };
+
+  inputJucator2.onkeydown = function (event) {
+    if (event.key === "Enter") {
+      confirmaNumeJucator2();
+    }
+  };
+
+  inputJucator1.focus();
+}
+
+function confirmaNumeJucator1() {
+  let inputJucator1 = document.getElementById("input-jucator-1");
+  let nume = inputJucator1.value.trim();
+
+  if (nume === "") {
+    mesajIntroducere = "Introdu numele jucatorului 1.";
+    return;
+  }
+
+  seteazaNumeJucator1(nume);
+  document.getElementById("formular-jucator-1").style.display = "none";
+
+  let inputJucator2 = document.getElementById("input-jucator-2");
+  let butonJucator2 = document.getElementById("buton-jucator-2");
+  inputJucator2.disabled = false;
+  butonJucator2.disabled = false;
+  inputJucator2.focus();
+
+  mesajIntroducere = "Introdu numele jucatorului 2.";
+  actualizeazaCaseteJucatori();
+}
+
+function confirmaNumeJucator2() {
+  let inputJucator2 = document.getElementById("input-jucator-2");
+  let nume = inputJucator2.value.trim();
+
+  if (nume === "") {
+    mesajIntroducere = "Introdu numele jucatorului 2.";
+    return;
+  }
+
+  seteazaNumeJucator2(nume);
+  document.getElementById("formular-jucator-2").style.display = "none";
+  mesajIntroducere = "Distractie la joc!";
+  jocPornit = true;
+  actualizeazaCaseteJucatori();
 }
 
 function calculeazaNoduri() {
@@ -158,3 +284,8 @@ function deseneazaNoduri() {
     ellipse(noduri[i].x, noduri[i].y, r * 0.6, r * 0.6);
   }
 }
+
+window.setup = setup;
+window.windowResized = windowResized;
+window.draw = draw;
+window.mousePressed = mousePressed;

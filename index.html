@@ -10,10 +10,39 @@
 <body>
 
   <h1>Moara</h1>
-  <div id="canvas-container"></div>
 
-  <script src="pieces.js"></script>
-  <script src="board.js"></script>
+  <div class="game-container">
+    <div class="player-box player-one">
+      <h2>Jucatorul 1</h2>
+      <div id="formular-jucator-1" class="name-form">
+        <input id="input-jucator-1" type="text" placeholder="Introdu numele" />
+        <button id="buton-jucator-1">Confirma</button>
+      </div>
+      <p id="nume-jucator-1">Nume necompletat</p>
+      <p>Piese pe tabla: <span id="piese-tabla-1">0</span></p>
+      <p>Piese luate: <span id="piese-luate-1">0</span></p>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div class="player-box player-two">
+      <h2>Jucatorul 2</h2>
+      <div id="formular-jucator-2" class="name-form">
+        <input
+          id="input-jucator-2"
+          type="text"
+          placeholder="Introdu numele"
+          disabled
+        />
+        <button id="buton-jucator-2" disabled>Confirma</button>
+      </div>
+      <p id="nume-jucator-2">Nume necompletat</p>
+      <p>Piese pe tabla: <span id="piese-tabla-2">0</span></p>
+      <p>Piese luate: <span id="piese-luate-2">0</span></p>
+    </div>
+  </div>
+
+  <script type="module" src="./board.js"></script>
 
 </body>
 </html>
