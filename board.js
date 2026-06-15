@@ -1,5 +1,6 @@
 import {
   board,
+  pieseInMana,
   pieseLuate,
   jucatorCurent,
   numePj1,
@@ -137,6 +138,8 @@ function actualizeazaCaseteJucatori() {
     numePj2 === "" ? "Nume necompletat" : numePj2;
   document.getElementById("piese-tabla-1").textContent = pieseJucator1;
   document.getElementById("piese-tabla-2").textContent = pieseJucator2;
+  document.getElementById("piese-ramase-1").textContent = pieseInMana[1];
+  document.getElementById("piese-ramase-2").textContent = pieseInMana[2];
   document.getElementById("piese-luate-1").textContent = pieseLuate[1];
   document.getElementById("piese-luate-2").textContent = pieseLuate[2];
 }
