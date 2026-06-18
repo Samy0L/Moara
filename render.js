@@ -1,4 +1,5 @@
-import {
+///render.js - se ocupa cu desenarea graficii
+import { 
   state,
   ADIACENTE,
   numeJucator,
@@ -6,7 +7,7 @@ import {
   poateEliminaPiesa,
 } from "./pieces.js";
 
-export function calculeazaNoduri(marime_canvas) {
+export function calculeazaNoduri(marime_canvas) {///calculează coordonatele {x, y} pixel ale celor 24 de noduri. Logica: centrul tablei e (cx, cy) = (s/2, s/2), marginea e s * 0.08, distanța între inele e (s/2 - margine) / 3
   let noduri = [];
   let s = marime_canvas;
   let cx = s / 2;
@@ -31,7 +32,7 @@ export function calculeazaNoduri(marime_canvas) {
   return noduri;
 }
 
-export function getNodLaClick(mx, my, noduri, marime_canvas) {
+export function getNodLaClick(mx, my, noduri, marime_canvas) {///caută nodul cel mai apropiat de coordonatele click-ului, cu un prag de marime_canvas * 0.05 pixeli. Dacă cel mai apropiat nod e mai departe decât pragul → returnează -1. 
   let prag = marime_canvas * 0.05;
   let celMaiBun = -1;
   let distMin = prag;

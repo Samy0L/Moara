@@ -12,7 +12,7 @@ import {
   poateEliminaPiesa,
 } from "./pieces.js";
 
-export async function mutareCalculator(modJoc, proceseazaRezultat, declanseazaVictorie) {
+export async function mutareCalculator(modJoc, proceseazaRezultat, declanseazaVictorie) { ///funcția principală, async. Afișează "Calculatorul se gândește...", așteaptă 500ms (delay artificial pentru UX), verifică dacă trebuie să elimine o piesă, alege o mutare cu alegeMutareCalculator(modJoc), execută mutarea. Dacă mutarea a format o moară, elimină imediat o piesă adversă (după încă 400ms delay).
   state.mesaj = "Calculatorul se gandeste...";
   await asteapta(500);
 
@@ -22,7 +22,7 @@ export async function mutareCalculator(modJoc, proceseazaRezultat, declanseazaVi
     return;
   }
 
-  actualizeazaFaza(2);
+  actualizeazaFaza(2); ///actualizează faza calculatorului (pentru a afișa "Calculatorul plasează o piesă." sau "Calculatorul mută o piesă." în UI)
   let faza = state.faza[2];
   let mutare = alegeMutareCalculator(modJoc);
 
@@ -78,11 +78,15 @@ function alegeMutareRandom(jucator) {
   return mutari[Math.floor(Math.random() * mutari.length)];
 }
 
-function alegeMutareModerata() {
+function alegeMutareModerata() {/// logică mai complexă, în ordine de priorități:
+                               ///Caută o mutare care formează o moară pentru calculator → atacă
+                              ///Caută o mutare a omului care ar forma o moară → blochează acea poziție
+                             ///Preferă nodurile de mijloc (indicii impari: 1,3,5,7,9...) — acestea sunt intersecțiile dintre inele, mai valoroase strategic
+                            ///Fallback → mutare aleatorie
   let mutari = mutariDisponibile(2);
   if (mutari.length === 0) return null;
 
-  let mutareMoara = gasesteMutareCareFaceMoara(2, mutari);
+  let mutareMoara = gasesteMutareCareFaceMoara(2, mutari); 
   if (mutareMoara) return mutareMoara;
 
   let mutariOm = mutariDisponibile(1);
@@ -99,7 +103,7 @@ function alegeMutareModerata() {
   return alegeMutareRandom(2);
 }
 
-function gasesteMutareCareFaceMoara(jucator, mutari) {
+function gasesteMutareCareFaceMoara(jucator, mutari) {///gasesteMutareCareFaceMoara(jucator, mutari) — simulează fiecare mutare temporar pe tablă (pune piesa, verifică moara, o ia înapoi) și returnează prima mutare care formează o moară. Este o simulare non-destructivă: restaurează starea tablei după fiecare test.
   for (const mutare of mutari) {
     let fromVal = -1;
 
@@ -125,7 +129,7 @@ function gasesteMutareCareFaceMoara(jucator, mutari) {
   return null;
 }
 
-function mutareFaceMoara(idx, jucator) {
+function mutareFaceMoara(idx, jucator) {///verifică dacă nodul idx completează o moară, parcurgând MORI_POSIBILE.
   for (const moara of MORI_POSIBILE) {
     if (
       moara.includes(idx) &&
@@ -140,7 +144,7 @@ function mutareFaceMoara(idx, jucator) {
   return false;
 }
 
-function alegePiesaDeEliminat(jucator, modJoc) {
+function alegePiesaDeEliminat(jucator, modJoc) { ///pe easy: aleatoriu din piesele eliminabile. Pe moderate: preferă piesa adversă care e cel mai aproape de a forma o moară (are deja 2 piese dintr-un triplet și un nod gol) — o eliminare preventivă.
   let adversar = jucator === 1 ? 2 : 1;
   let pieseAdversar = pozitiiJucator(adversar);
   let variante = pieseAdversar.filter((idx) => poateEliminaPiesa(idx, jucator));
@@ -158,7 +162,7 @@ function alegePiesaDeEliminat(jucator, modJoc) {
   return variante[0];
 }
 
-function piesaAproapeDeMoara(idx, jucator) {
+function piesaAproapeDeMoara(idx, jucator) { ///verifică dacă piesa de la idx face parte dintr-un triplet unde jucatorul mai are 2 piese și există 1 nod gol (ar forma moară la next move).
   for (const moara of MORI_POSIBILE) {
     if (!moara.includes(idx)) continue;
 

@@ -1,4 +1,4 @@
-// board.js - fisierul principal al jocului
+// board.js - Este punctul de intrare al aplicației. Definește funcțiile p5.js (setup, draw, mousePressed) și coordonează toate celelalte module.
 
 import {
   state,
@@ -78,8 +78,8 @@ const restartButton = {
   },
 };
 
-function setup() {
-  marime_canvas = calculeazaMarimaCanvas();
+function setup() { ///apelat o singură dată de p5.js la start: calculează dimensiunea canvas-ului, creează canvas-ul p5.js și îl pune în div#canvas-container
+  marime_canvas = calculeazaMarimaCanvas();///DACA MAI CERE DETALII: calculează pozițiile nodurilor, inițializează butonul restart, citește modul de joc din <select>, setează event handler-ul pe select, setează handler-ele pentru butoanele de confirmare a numelor.
   let cnv = createCanvas(marime_canvas, marime_canvas + 60);
   cnv.parent("canvas-container");
   noduri = calculeazaNoduri(marime_canvas);
@@ -131,8 +131,12 @@ function mousePressed() {
   handleClick(idx);
 }
 
-async function handleClick(idx) {
-  if (state.trebuieEliminata) {
+async function handleClick(idx) { ///logica principală de click
+  if (state.trebuieEliminata) {  ///DACA INTREABA DETALII: 
+                                ///Dacă trebuieEliminata → eliminaPiesa(idx) și procesează rezultatul
+                               ///Dacă faza 1 → plaseazaPiesa(idx)
+                              ///Dacă nodul e al jucătorului curent → selecteazaPiesa(idx, faza) (selectează piesa)
+                             ///Dacă un nod e selectat și destinația e liberă → mutaPiesa(from, to)
     let rezultat = await eliminaPiesa(idx);
     proceseazaRezultat(rezultat);
     return;

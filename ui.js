@@ -1,10 +1,11 @@
+///ui.js - se ocupa cu actualizarea elementelor HTML (UI) în funcție de starea jocului.
 import {
   state,
   numarPieseBoard,
   numeJucator,
 } from "./pieces.js";
 
-export function actualizeazaUI(jocPornit) {
+export function actualizeazaUI(jocPornit) { ///funcția apelată la fiecare frame din draw()
   document.getElementById("nume-jucator-1").textContent =
     state.numePj1 || "Nume necompletat";
   document.getElementById("nume-jucator-2").textContent =
@@ -26,7 +27,7 @@ export function actualizeazaUI(jocPornit) {
   );
 }
 
-export function pregatesteSelectareMod(onSchimbareMod) {
+export function pregatesteSelectareMod(onSchimbareMod) { ///setează event handler-ul pentru <select id="mod-joc">, care apelează onSchimbareMod(modJoc) când se schimbă modul de joc
   document.getElementById("mod-joc").onchange = function () {
     onSchimbareMod(document.getElementById("mod-joc").value);
   };
@@ -50,7 +51,7 @@ export function actualizeazaTextMod(modJoc) {
   document.getElementById("mod-curent").textContent = text;
 }
 
-export function pregatesteFormulareNume(confirmaNumeJucator1, confirmaNumeJucator2, restartComplet) {
+export function pregatesteFormulareNume(confirmaNumeJucator1, confirmaNumeJucator2, restartComplet) { ///atașează onclick pe butoane și onkeydown (Enter) pe inputuri. Setează focus automat pe primul input.
   document.getElementById("buton-jucator-1").onclick = confirmaNumeJucator1;
   document.getElementById("buton-jucator-2").onclick = confirmaNumeJucator2;
   document.getElementById("input-jucator-1").onkeydown = function (event) {
@@ -63,17 +64,17 @@ export function pregatesteFormulareNume(confirmaNumeJucator1, confirmaNumeJucato
   document.getElementById("input-jucator-1").focus();
 }
 
-export function arataFormularJucator2() {
+export function arataFormularJucator2() {///activează inputul și butonul jucătorului 2 (inițial disabled), setează focus.
   document.getElementById("input-jucator-2").disabled = false;
   document.getElementById("buton-jucator-2").disabled = false;
   document.getElementById("input-jucator-2").focus();
 }
 
-export function ascundeFormularJucator1() {
+export function ascundeFormularJucator1() { ///setează display: none pe div-ul formularului.
   document.getElementById("formular-jucator-1").style.display = "none";
 }
 
-export function ascundeFormularJucator2() {
+export function ascundeFormularJucator2() { ///setează display: none pe div-ul formularului.
   document.getElementById("formular-jucator-2").style.display = "none";
 }
 
