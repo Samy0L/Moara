@@ -1,6 +1,6 @@
 // pieces.js - starea jocului si logica de baza
 
-export const MAX_PIESE = 9;
+const MAX_PIESE = 9;
 
 export const MORI_POSIBILE = [
   [0, 1, 2], [2, 3, 4], [4, 5, 6], [6, 7, 0],
@@ -9,7 +9,7 @@ export const MORI_POSIBILE = [
   [1, 9, 17], [3, 11, 19], [5, 13, 21], [7, 15, 23],
 ];
 
-export const POZITII_MATRICE = [
+const POZITII_MATRICE = [
   [0, 0], [0, 3], [0, 6],
   [1, 1], [1, 3], [1, 5],
   [2, 2], [2, 3], [2, 4],
@@ -245,22 +245,7 @@ export async function plaseazaPiesa(idx) {
   state.pieseInMana[state.jucatorCurent]--;
   state.noduriMoara = [];
 
-  if (verificaMoara(idx, state.jucatorCurent)) {
-    const nume = numeJucator(state.jucatorCurent);
-    if (existaPiesaEliminabila(state.jucatorCurent)) {
-      state.mesaj = `${nume} a format o MOARA! Alege o piesa adversa.`;
-      state.trebuieEliminata = true;
-      state.eliminaPentru = state.jucatorCurent;
-      return true;
-    }
-
-    state.mesaj =
-      `${nume} a format o MOARA, dar adversarul are doar piese protejate.`;
-    schimbaJucatorul();
-    return true;
-  }
-
-  schimbaJucatorul();
+  finalizeazaMutarea(idx);
   return true;
 }
 
@@ -284,23 +269,28 @@ export async function mutaPiesa(from, to) {
   state.nodSelectat = -1;
   state.noduriMoara = [];
 
-  if (verificaMoara(to, state.jucatorCurent)) {
-    const nume = numeJucator(state.jucatorCurent);
-    if (existaPiesaEliminabila(state.jucatorCurent)) {
-      state.mesaj = `${nume} a format o MOARA! Alege o piesa adversa.`;
-      state.trebuieEliminata = true;
-      state.eliminaPentru = state.jucatorCurent;
-      return true;
-    }
+  finalizeazaMutarea(to);
+  return true;
+}
 
-    state.mesaj =
-      `${nume} a format o MOARA, dar adversarul are doar piese protejate.`;
+function finalizeazaMutarea(idx) {
+  if (!verificaMoara(idx, state.jucatorCurent)) {
     schimbaJucatorul();
-    return true;
+    return;
   }
 
+  const nume = numeJucator(state.jucatorCurent);
+
+  if (existaPiesaEliminabila(state.jucatorCurent)) {
+    state.mesaj = `${nume} a format o MOARA! Alege o piesa adversa.`;
+    state.trebuieEliminata = true;
+    state.eliminaPentru = state.jucatorCurent;
+    return;
+  }
+
+  state.mesaj =
+    `${nume} a format o MOARA, dar adversarul are doar piese protejate.`;
   schimbaJucatorul();
-  return true;
 }
 
 export async function eliminaPiesa(idx) {

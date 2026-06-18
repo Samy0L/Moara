@@ -7,7 +7,6 @@ import {
   mutaPiesa,
   eliminaPiesa,
   verificaInfrangere,
-  actualizeazaFaza,
   restartJoc,
   piesaLa,
 } from "./pieces.js";
@@ -266,14 +265,11 @@ function restartComplet() {
   actualizeazaTextMod(modJoc);
   ascundeVictorie();
   resetFormulare();
-  actualizeazaFaza(1);
-  actualizeazaFaza(2);
   actualizeazaUI(jocPornit);
 }
 
 function calculeazaMarimaCanvas() {
-  let latimeDisponibila = windowWidth - 460;
-  if (windowWidth <= 900) latimeDisponibila = windowWidth - 40;
+  let latimeDisponibila = windowWidth <= 900 ? windowWidth - 40 : windowWidth - 460;
   return max(min(latimeDisponibila, windowHeight - 120), 280);
 }
 

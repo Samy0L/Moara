@@ -69,11 +69,7 @@ export function deseneazaNoduri(marime_canvas, noduri) {
   for (let i = 0; i < noduri.length; i++) {
     if (piesaLa(i) !== 0) continue;
 
-    let esteDestinatie = state.nodSelectat !== -1 && (function () {
-      let faza = state.faza[state.jucatorCurent];
-      if (faza === 3) return true;
-      return ADIACENTE[state.nodSelectat].includes(i);
-    })();
+    let esteDestinatie = esteDestinatieValida(i);
 
     if (esteDestinatie) {
       stroke(96, 170, 255);
@@ -93,6 +89,12 @@ export function deseneazaNoduri(marime_canvas, noduri) {
       ellipse(noduri[i].x, noduri[i].y, r * 0.6, r * 0.6);
     }
   }
+}
+
+function esteDestinatieValida(idx) {
+  if (state.nodSelectat === -1) return false;
+  if (state.faza[state.jucatorCurent] === 3) return true;
+  return ADIACENTE[state.nodSelectat].includes(idx);
 }
 
 export function deseneazaPiese(marime_canvas, noduri) {
