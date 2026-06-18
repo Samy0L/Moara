@@ -12,7 +12,7 @@
   <h1>Moara</h1>
 
   <div class="game-container">
-    <div class="player-box player-one">
+    <div class="player-box player-one" id="player-box-1">
       <h2>Jucatorul 1</h2>
       <div id="formular-jucator-1" class="name-form">
         <input id="input-jucator-1" type="text" placeholder="Introdu numele" />
@@ -26,7 +26,7 @@
 
     <div id="canvas-container"></div>
 
-    <div class="player-box player-two">
+    <div class="player-box player-two" id="player-box-2">
       <h2>Jucatorul 2</h2>
       <div id="formular-jucator-2" class="name-form">
         <input
@@ -44,6 +44,16 @@
     </div>
   </div>
 
+  <!-- Win overlay -->
+  <div id="win-overlay" class="hidden">
+    <div id="win-box">
+      <h2 id="win-title">🏆 Victorie!</h2>
+      <p id="win-desc"></p>
+      <button id="win-restart-btn">Joc nou</button>
+    </div>
+  </div>
+
+  <script type="module" src="./pieces.js"></script>
   <script type="module" src="./board.js"></script>
 
 </body>
