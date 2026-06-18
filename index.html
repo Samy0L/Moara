@@ -11,6 +11,16 @@
 
   <h1>Moara</h1>
 
+  <div class="mode-box">
+    <label for="mod-joc">Mod de joc:</label>
+    <select id="mod-joc">
+      <option value="human-human">Human vs Human</option>
+      <option value="computer-easy">Human vs Computer - Easy</option>
+      <option value="computer-moderate">Human vs Computer - Moderate</option>
+    </select>
+    <p>Mod curent: <span id="mod-curent">Human vs Human</span></p>
+  </div>
+
   <div class="game-container">
     <div class="player-box player-one" id="player-box-1">
       <h2>Jucatorul 1</h2>
@@ -44,16 +54,14 @@
     </div>
   </div>
 
-  <!-- Win overlay -->
   <div id="win-overlay" class="hidden">
     <div id="win-box">
-      <h2 id="win-title">🏆 Victorie!</h2>
+      <h2 id="win-title">Victorie!</h2>
       <p id="win-desc"></p>
       <button id="win-restart-btn">Joc nou</button>
     </div>
   </div>
 
-  <script type="module" src="./pieces.js"></script>
   <script type="module" src="./board.js"></script>
 
 </body>

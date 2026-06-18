@@ -19,6 +19,33 @@ h1 {
   letter-spacing: 0.15em;
 }
 
+.mode-box {
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 12px 18px;
+  background-color: #25221e;
+  border: 1px solid #c8a84b;
+  border-radius: 8px;
+}
+
+.mode-box label {
+  margin-right: 8px;
+}
+
+.mode-box select {
+  padding: 7px;
+  background-color: #1a1a1a;
+  color: #e0d5b0;
+  border: 1px solid #c8a84b;
+  border-radius: 4px;
+  font-family: Georgia, serif;
+}
+
+.mode-box p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
 .game-container {
   display: grid;
   grid-template-columns: 190px auto 190px;

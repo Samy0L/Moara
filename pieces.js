@@ -1,4 +1,4 @@
-// pieces.js — starea jocului si logica de baza (plasare, mori, eliminare)
+// pieces.js - starea jocului si logica de baza
 
 export const MAX_PIESE = 9;
 
@@ -9,11 +9,6 @@ export const MORI_POSIBILE = [
   [1, 9, 17], [3, 11, 19], [5, 13, 21], [7, 15, 23],
 ];
 
-export const ADIACENTE = buildAdiacente();
-
-// ── Reprezentare matrice 7x7 a tablei ──────────────────────────────────────
-// Cele 24 noduri sunt mapate pe o matrice 7x7, ca pe tabla reala de Moara.
-// Restul celulelor din matrice nu sunt noduri valide (raman null).
 export const POZITII_MATRICE = [
   [0, 0], [0, 3], [0, 6],
   [1, 1], [1, 3], [1, 5],
@@ -25,31 +20,10 @@ export const POZITII_MATRICE = [
   [6, 0], [6, 3], [6, 6],
 ];
 
-export function idxToRC(idx) {
-  return POZITII_MATRICE[idx];
-}
-
-// Construieste matricea 7x7 din board-ul liniar (folosita pentru desenare/UI)
-export function boardCaMatrice() {
-  const matrice = Array.from({ length: 7 }, () => Array(7).fill(null));
-  for (let idx = 0; idx < 24; idx++) {
-    const [r, c] = POZITII_MATRICE[idx];
-    matrice[r][c] = state.board[idx];
-  }
-  return matrice;
-}
-
-function buildAdiacente() {
-  const adj = Array.from({ length: 24 }, () => new Set());
-  for (const [a, b, c] of MORI_POSIBILE) {
-    adj[a].add(b); adj[b].add(a);
-    adj[b].add(c); adj[c].add(b);
-  }
-  return adj.map((s) => [...s]);
-}
+export const ADIACENTE = buildAdiacente();
 
 export const state = {
-  board: new Array(24).fill(0),
+  board: creeazaMatriceBoard(),
   pieseInMana: { 1: MAX_PIESE, 2: MAX_PIESE },
   pieseLuate: { 1: 0, 2: 0 },
   faza: { 1: 1, 2: 1 },
@@ -64,96 +38,225 @@ export const state = {
   jocTerminat: false,
 };
 
+function creeazaMatriceBoard() {
+  const matrice = Array.from({ length: 7 }, () => Array(7).fill(null));
+
+  for (let i = 0; i < POZITII_MATRICE.length; i++) {
+    const [r, c] = POZITII_MATRICE[i];
+    matrice[r][c] = 0;
+  }
+
+  return matrice;
+}
+
+function buildAdiacente() {
+  const adj = Array.from({ length: 24 }, () => new Set());
+
+  for (const [a, b, c] of MORI_POSIBILE) {
+    adj[a].add(b);
+    adj[b].add(a);
+    adj[b].add(c);
+    adj[c].add(b);
+  }
+
+  return adj.map((s) => [...s]);
+}
+
+function idxToRC(idx) {
+  return POZITII_MATRICE[idx];
+}
+
+export function piesaLa(idx) {
+  const [r, c] = idxToRC(idx);
+  return state.board[r][c];
+}
+
+export function punePiesaLa(idx, valoare) {
+  const [r, c] = idxToRC(idx);
+  state.board[r][c] = valoare;
+}
+
+function pozitiiGoale() {
+  const pozitii = [];
+
+  for (let i = 0; i < 24; i++) {
+    if (piesaLa(i) === 0) {
+      pozitii.push(i);
+    }
+  }
+
+  return pozitii;
+}
+
+export function pozitiiJucator(jucator) {
+  const pozitii = [];
+
+  for (let i = 0; i < 24; i++) {
+    if (piesaLa(i) === jucator) {
+      pozitii.push(i);
+    }
+  }
+
+  return pozitii;
+}
+
 export function numarPieseBoard(jucator) {
-  return state.board.filter((v) => v === jucator).length;
+  return pozitiiJucator(jucator).length;
 }
 
 export function actualizeazaFaza(jucator) {
-  if (state.pieseInMana[jucator] > 0) { state.faza[jucator] = 1; return; }
+  if (state.pieseInMana[jucator] > 0) {
+    state.faza[jucator] = 1;
+    return;
+  }
+
   state.faza[jucator] = numarPieseBoard(jucator) <= 3 ? 3 : 2;
 }
 
 export function verificaMoara(idx, jucator) {
   let gasita = false;
   const nouNoduri = [];
+
   for (const moara of MORI_POSIBILE) {
     if (
       moara.includes(idx) &&
-      state.board[moara[0]] === jucator &&
-      state.board[moara[1]] === jucator &&
-      state.board[moara[2]] === jucator
+      piesaLa(moara[0]) === jucator &&
+      piesaLa(moara[1]) === jucator &&
+      piesaLa(moara[2]) === jucator
     ) {
       gasita = true;
+
       for (const n of moara) {
-        if (!nouNoduri.includes(n)) nouNoduri.push(n);
+        if (!nouNoduri.includes(n)) {
+          nouNoduri.push(n);
+        }
       }
     }
   }
-  if (gasita) state.noduriMoara = nouNoduri;
+
+  if (gasita) {
+    state.noduriMoara = nouNoduri;
+  }
+
   return gasita;
 }
 
 export function estePiesaInMoara(idx, jucator) {
   return MORI_POSIBILE.some(
-    (m) =>
-      m.includes(idx) &&
-      state.board[m[0]] === jucator &&
-      state.board[m[1]] === jucator &&
-      state.board[m[2]] === jucator
+    (moara) =>
+      moara.includes(idx) &&
+      piesaLa(moara[0]) === jucator &&
+      piesaLa(moara[1]) === jucator &&
+      piesaLa(moara[2]) === jucator
   );
 }
 
-export function existaPiesaInAfaraMorii(jucator) {
-  return state.board.some(
-    (v, i) => v === jucator && !estePiesaInMoara(i, jucator)
-  );
-}
+export function poateEliminaPiesa(idx, jucatorCareElimina) {
+  const adversar = jucatorCareElimina === 1 ? 2 : 1;
 
-export function mutariDisponibile(jucator) {
-  if (state.faza[jucator] === 3) {
-    const froms = state.board.reduce((a, v, i) => (v === jucator ? [...a, i] : a), []);
-    const tos = state.board.reduce((a, v, i) => (v === 0 ? [...a, i] : a), []);
-    return froms.flatMap((f) => tos.map((t) => ({ from: f, to: t })));
+  if (piesaLa(idx) !== adversar) {
+    return false;
   }
-  const moves = [];
+
+  if (estePiesaInMoara(idx, adversar)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function existaPiesaEliminabila(jucatorCareElimina) {
   for (let i = 0; i < 24; i++) {
-    if (state.board[i] !== jucator) continue;
-    for (const j of ADIACENTE[i]) {
-      if (state.board[j] === 0) moves.push({ from: i, to: j });
+    if (poateEliminaPiesa(i, jucatorCareElimina)) {
+      return true;
     }
   }
-  return moves;
-}
 
-export function verificaInfrângere(jucator) {
-  if (state.pieseInMana[jucator] === 0 && numarPieseBoard(jucator) < 3) return true;
-  if (state.faza[jucator] === 2 && mutariDisponibile(jucator).length === 0) return true;
   return false;
 }
 
-// ── Actiuni ────────────────────────────────────────────────────────────────
+export function mutariDisponibile(jucator) {
+  actualizeazaFaza(jucator);
 
-// ── Helper async ────────────────────────────────────────────────────────
-// Simuleaza o mica intarziere (ex: validare mutare), pentru a demonstra async/await.
+  if (state.faza[jucator] === 1) {
+    return pozitiiGoale().map((to) => ({ from: -1, to }));
+  }
+
+  if (state.faza[jucator] === 3) {
+    const mutari = [];
+    const piese = pozitiiJucator(jucator);
+    const goale = pozitiiGoale();
+
+    for (const from of piese) {
+      for (const to of goale) {
+        mutari.push({ from, to });
+      }
+    }
+
+    return mutari;
+  }
+
+  const mutari = [];
+
+  for (let i = 0; i < 24; i++) {
+    if (piesaLa(i) !== jucator) continue;
+
+    for (const j of ADIACENTE[i]) {
+      if (piesaLa(j) === 0) {
+        mutari.push({ from: i, to: j });
+      }
+    }
+  }
+
+  return mutari;
+}
+
+export function verificaInfrangere(jucator) {
+  actualizeazaFaza(jucator);
+
+  if (state.pieseInMana[jucator] === 0 && numarPieseBoard(jucator) < 3) {
+    return true;
+  }
+
+  if (state.faza[jucator] === 2 && mutariDisponibile(jucator).length === 0) {
+    return true;
+  }
+
+  return false;
+}
+
 function asteapta(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function plaseazaPiesa(idx) {
-  if (state.board[idx] !== 0) { state.mesaj = "⚠ Nodul este ocupat."; return false; }
-  if (state.pieseInMana[state.jucatorCurent] <= 0) return false;
+  if (piesaLa(idx) !== 0) {
+    state.mesaj = "Nodul este ocupat.";
+    return false;
+  }
 
-  await asteapta(150); // validare mutare (async)
+  if (state.pieseInMana[state.jucatorCurent] <= 0) {
+    return false;
+  }
 
-  state.board[idx] = state.jucatorCurent;
+  await asteapta(150);
+
+  punePiesaLa(idx, state.jucatorCurent);
   state.pieseInMana[state.jucatorCurent]--;
   state.noduriMoara = [];
 
   if (verificaMoara(idx, state.jucatorCurent)) {
     const nume = numeJucator(state.jucatorCurent);
-    state.mesaj = `🟢 ${nume} a format o MOARA! Alege o piesa adversa de eliminat.`;
-    state.trebuieEliminata = true;
-    state.eliminaPentru = state.jucatorCurent;
+    if (existaPiesaEliminabila(state.jucatorCurent)) {
+      state.mesaj = `${nume} a format o MOARA! Alege o piesa adversa.`;
+      state.trebuieEliminata = true;
+      state.eliminaPentru = state.jucatorCurent;
+      return true;
+    }
+
+    state.mesaj =
+      `${nume} a format o MOARA, dar adversarul are doar piese protejate.`;
+    schimbaJucatorul();
     return true;
   }
 
@@ -162,25 +265,37 @@ export async function plaseazaPiesa(idx) {
 }
 
 export async function mutaPiesa(from, to) {
-  const pl = state.faza[state.jucatorCurent];
+  const faza = state.faza[state.jucatorCurent];
 
-  if (pl === 2 && !ADIACENTE[from].includes(to)) {
-    state.mesaj = "⚠ Noduri neadiacente. Alege un vecin liber.";
+  if (piesaLa(from) !== state.jucatorCurent || piesaLa(to) !== 0) {
+    state.mesaj = "Mutarea nu este valida.";
     return false;
   }
 
-  await asteapta(150); // validare mutare (async)
+  if (faza === 2 && !ADIACENTE[from].includes(to)) {
+    state.mesaj = "Noduri neadiacente. Alege un vecin liber.";
+    return false;
+  }
 
-  state.board[to] = state.jucatorCurent;
-  state.board[from] = 0;
+  await asteapta(150);
+
+  punePiesaLa(to, state.jucatorCurent);
+  punePiesaLa(from, 0);
   state.nodSelectat = -1;
   state.noduriMoara = [];
 
   if (verificaMoara(to, state.jucatorCurent)) {
     const nume = numeJucator(state.jucatorCurent);
-    state.mesaj = `🟢 ${nume} a format o MOARA! Alege o piesa adversa de eliminat.`;
-    state.trebuieEliminata = true;
-    state.eliminaPentru = state.jucatorCurent;
+    if (existaPiesaEliminabila(state.jucatorCurent)) {
+      state.mesaj = `${nume} a format o MOARA! Alege o piesa adversa.`;
+      state.trebuieEliminata = true;
+      state.eliminaPentru = state.jucatorCurent;
+      return true;
+    }
+
+    state.mesaj =
+      `${nume} a format o MOARA, dar adversarul are doar piese protejate.`;
+    schimbaJucatorul();
     return true;
   }
 
@@ -192,27 +307,25 @@ export async function eliminaPiesa(idx) {
   const castigator = state.eliminaPentru;
   const adversar = castigator === 1 ? 2 : 1;
 
-  if (state.board[idx] !== adversar) {
-    state.mesaj = "⚠ Alege o piesa a adversarului.";
+  if (piesaLa(idx) !== adversar) {
+    state.mesaj = "Alege o piesa a adversarului.";
     return false;
   }
 
-  if (estePiesaInMoara(idx, adversar) && existaPiesaInAfaraMorii(adversar)) {
-    state.mesaj = "⚠ Aceasta piesa este intr-o moara. Alege alta.";
+  if (!poateEliminaPiesa(idx, castigator)) {
+    state.mesaj = "Piesa este protejata de moara deja existenta. Alege alta.";
     return false;
   }
 
-  await asteapta(150); // validare eliminare (async)
+  await asteapta(150);
 
-  state.board[idx] = 0;
+  punePiesaLa(idx, 0);
   state.pieseLuate[castigator]++;
   state.trebuieEliminata = false;
   state.eliminaPentru = 0;
   state.noduriMoara = [];
   state.mesaj = "";
 
-  // Verifica victoria INAINTE de a schimba jucatorul,
-  // exact in momentul in care adversarul a ramas cu < 3 piese
   actualizeazaFaza(adversar);
   if (state.pieseInMana[adversar] === 0 && numarPieseBoard(adversar) < 3) {
     return { castigator };
@@ -229,12 +342,16 @@ function schimbaJucatorul() {
   actualizeazaFaza(2);
 }
 
-export function numeJucator(j) {
-  return j === 1 ? state.numePj1 || "Jucatorul 1" : state.numePj2 || "Jucatorul 2";
+export function numeJucator(jucator) {
+  if (jucator === 1) {
+    return state.numePj1 || "Jucatorul 1";
+  }
+
+  return state.numePj2 || "Jucatorul 2";
 }
 
 export function restartJoc() {
-  state.board.fill(0);
+  state.board = creeazaMatriceBoard();
   state.pieseInMana[1] = MAX_PIESE;
   state.pieseInMana[2] = MAX_PIESE;
   state.pieseLuate[1] = 0;
