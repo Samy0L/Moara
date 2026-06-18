@@ -11,6 +11,8 @@ import {
   numarPieseBoard,
   numeJucator,
   restartJoc,
+  boardCaMatrice,
+  idxToRC,
 } from "./pieces.js";
 
 let marime_canvas;
@@ -95,15 +97,15 @@ function mousePressed() {
   const idx = getNodLaClick(mouseX, mouseY);
   if (idx === -1) return;
 
-  handleClick(idx);
+  handleClick(idx); // async — nu blocheaza desenarea (draw loop-ul p5)
 }
 
 // ── Logica click ──────────────────────────────────────────────────────────
 
-function handleClick(idx) {
+async function handleClick(idx) {
   // Elimina piesa adversarului dupa moara
   if (state.trebuieEliminata) {
-    const rezultat = eliminaPiesa(idx);
+    const rezultat = await eliminaPiesa(idx);
     if (rezultat && rezultat.castigator) {
       // Victoria se detecteaza imediat ce adversarul ramane cu < 3 piese
       declanseazaVictorie(rezultat.castigator);
@@ -117,7 +119,7 @@ function handleClick(idx) {
 
   // Faza 1 — plasare piesa
   if (faza === 1) {
-    if (plaseazaPiesa(idx)) {
+    if (await plaseazaPiesa(idx)) {
       verificaVictorie();
     }
     return;
@@ -143,7 +145,7 @@ function handleClick(idx) {
 
   // Muta piesa selectata pe nodul liber
   if (state.nodSelectat !== -1 && state.board[idx] === 0) {
-    if (mutaPiesa(state.nodSelectat, idx)) {
+    if (await mutaPiesa(state.nodSelectat, idx)) {
       verificaVictorie();
     }
     return;
@@ -222,12 +224,14 @@ function deseneazaNoduri() {
 
 function deseneazaPiese() {
   const r = marime_canvas * 0.032;
+  const matrice = boardCaMatrice(); // board-ul ca matrice 7x7
 
   for (let i = 0; i < 24; i++) {
-    if (state.board[i] === 0) continue;
+    const [rr, cc] = idxToRC(i);
+    if (matrice[rr][cc] === 0) continue;
 
     const nod = noduri[i];
-    const eJ1 = state.board[i] === 1;
+    const eJ1 = matrice[rr][cc] === 1;
     const inMoara = state.noduriMoara.includes(i);
     const eSelectat = i === state.nodSelectat;
     const eElim =

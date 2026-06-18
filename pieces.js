@@ -11,6 +11,34 @@ export const MORI_POSIBILE = [
 
 export const ADIACENTE = buildAdiacente();
 
+// ── Reprezentare matrice 7x7 a tablei ──────────────────────────────────────
+// Cele 24 noduri sunt mapate pe o matrice 7x7, ca pe tabla reala de Moara.
+// Restul celulelor din matrice nu sunt noduri valide (raman null).
+export const POZITII_MATRICE = [
+  [0, 0], [0, 3], [0, 6],
+  [1, 1], [1, 3], [1, 5],
+  [2, 2], [2, 3], [2, 4],
+  [3, 0], [3, 1], [3, 2],
+  [3, 4], [3, 5], [3, 6],
+  [4, 2], [4, 3], [4, 4],
+  [5, 1], [5, 3], [5, 5],
+  [6, 0], [6, 3], [6, 6],
+];
+
+export function idxToRC(idx) {
+  return POZITII_MATRICE[idx];
+}
+
+// Construieste matricea 7x7 din board-ul liniar (folosita pentru desenare/UI)
+export function boardCaMatrice() {
+  const matrice = Array.from({ length: 7 }, () => Array(7).fill(null));
+  for (let idx = 0; idx < 24; idx++) {
+    const [r, c] = POZITII_MATRICE[idx];
+    matrice[r][c] = state.board[idx];
+  }
+  return matrice;
+}
+
 function buildAdiacente() {
   const adj = Array.from({ length: 24 }, () => new Set());
   for (const [a, b, c] of MORI_POSIBILE) {
@@ -105,9 +133,17 @@ export function verificaInfrângere(jucator) {
 
 // ── Actiuni ────────────────────────────────────────────────────────────────
 
-export function plaseazaPiesa(idx) {
+// ── Helper async ────────────────────────────────────────────────────────
+// Simuleaza o mica intarziere (ex: validare mutare), pentru a demonstra async/await.
+function asteapta(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function plaseazaPiesa(idx) {
   if (state.board[idx] !== 0) { state.mesaj = "⚠ Nodul este ocupat."; return false; }
   if (state.pieseInMana[state.jucatorCurent] <= 0) return false;
+
+  await asteapta(150); // validare mutare (async)
 
   state.board[idx] = state.jucatorCurent;
   state.pieseInMana[state.jucatorCurent]--;
@@ -125,13 +161,15 @@ export function plaseazaPiesa(idx) {
   return true;
 }
 
-export function mutaPiesa(from, to) {
+export async function mutaPiesa(from, to) {
   const pl = state.faza[state.jucatorCurent];
 
   if (pl === 2 && !ADIACENTE[from].includes(to)) {
     state.mesaj = "⚠ Noduri neadiacente. Alege un vecin liber.";
     return false;
   }
+
+  await asteapta(150); // validare mutare (async)
 
   state.board[to] = state.jucatorCurent;
   state.board[from] = 0;
@@ -150,7 +188,7 @@ export function mutaPiesa(from, to) {
   return true;
 }
 
-export function eliminaPiesa(idx) {
+export async function eliminaPiesa(idx) {
   const castigator = state.eliminaPentru;
   const adversar = castigator === 1 ? 2 : 1;
 
@@ -163,6 +201,8 @@ export function eliminaPiesa(idx) {
     state.mesaj = "⚠ Aceasta piesa este intr-o moara. Alege alta.";
     return false;
   }
+
+  await asteapta(150); // validare eliminare (async)
 
   state.board[idx] = 0;
   state.pieseLuate[castigator]++;
